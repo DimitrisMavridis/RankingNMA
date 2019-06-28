@@ -107,16 +107,21 @@ sucra.weight=c(0.17,0.69,0.05,0.44,0.49,0.1,0.86,0.42,0.73,0.28,0.84,0.27,0.65,0
 
 plot(sucra.efficacy, sucra.acceptability,xlab='efficacy',ylab='acceptability',main="SUCRA values")
 
-text(sucra.efficacy, sucra.acceptability,labels=antipsychotic)
 
-install.packages("scatterplot3d")
-library(scatterplot3d)
+antipsychotic=c("CLO", "AMI", "OLA", "RIS", "PAL" ,"ZOT", "HAL", "QUE", "ARI" ,"SER", "ZIP", "CPZ" ,"ASE" ,"LUR" ,"ILO", "PBO")
 
-s3d<-scatterplot3d(sucra.efficacy,sucra.acceptability,sucra.weight,xlab="efficacy",ylab="acceptability",zlab="weight gain")
-s3d.coords <- s3d$xyz.convert(sucra.efficacy,sucra.acceptability,sucra.weight) # convert 3D coords to 2D projection
-text(s3d.coords$x, s3d.coords$y,             # x and y coordinates
-     labels=antipsychotic,               # text to plot
-     cex=.5, pos=4)  
+par(mfrow=c(1,3))
+plot(sucra.efficacy, sucra.acceptability,xlab='efficacy',ylab='weight',main="efficacy vs weight gain")
+text(sucra.efficacy, sucra.acceptability, labels=antipsychotic, cex= 0.7, pos=3)
+
+
+plot(sucra.efficacy, sucra.weight,xlab='efficacy',ylab='weight',main="efficacy vs weight gain")
+text(sucra.efficacy, sucra.weight, labels=antipsychotic, cex= 0.7, pos=3)
+
+
+plot(sucra.acceptability, sucra.weight,xlab='acceptability',ylab='weight',main="acceptability vs weight gain")
+text(sucra.acceptability, sucra.weight, labels=antipsychotic, cex= 0.7, pos=3)
+
 
 
 
