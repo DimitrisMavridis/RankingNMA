@@ -7,7 +7,7 @@ library("mvtnorm")
 pscores<-function(outcomes,var.outcomes,correlation,beta,type,label)
 {
   # package mvtnorm is needed (https://cran.r-project.org/web/packages/mvtnorm/index.html)
-  # this function estimates P-scores (https://bmcmedresmethodol.biomedcentral.com/articles/10.1186/s12874-015-0060-8) for i) ranking many outcomes simultaneously ii) taking into account differences of a certain effect across treatments
+  # this function estimates P-scores (presented in this paper https://bmcmedresmethodol.biomedcentral.com/articles/10.1186/s12874-015-0060-8) for i) ranking many outcomes simultaneously ii) taking into account differences of a certain effect across treatments
   # outcomes is an array with all the league tables of the K outcomes we consider
   # var.outcomes is an array with the standard errors of the relative effects shown in the league table
   # correlation is KxK correlation matrix for the outcomes considered
@@ -17,7 +17,7 @@ pscores<-function(outcomes,var.outcomes,correlation,beta,type,label)
   p=dim(outcomes)[[1]]
   
   k=dim(outcomes)[[3]]
-
+  
   for (h in 1:k)
   {
     if (type[h]=="H")
@@ -91,13 +91,17 @@ pscores<-function(outcomes,var.outcomes,correlation,beta,type,label)
 
 ################## Schizophrenia Lancet paper - inserting data##########################
 
+#Data can be found in Figure 2 (efficacy and acceptability/all-cause discontinuation) and Figure 5 (weight gain) in the publication
+#https://www.sciencedirect.com/science/article/pii/S0140673613607333
+
+#Leucht, S., Cipriani, A., Spineli, L., Mavridis, D., Örey, D., Richter, F., Samara, M., Barbui, C., Engel, R. R., Geddes, J. R., Kissling, W., Stapf, M. P., Lässig, B., Salanti, G. and Davis, J. M. (2013). Comparative efficacy and tolerability of 15 antipsychotic drugs in schizophrenia: A multiple-treatments meta-analysis. The Lancet 382, 951-962
+
 p=16
 
 antipsychotic=c("CLO", "AMI", "OLA", "RIS", "PAL" ,"ZOT", "HAL", "QUE", "ARI" ,"SER", "ZIP", "CPZ" ,"ASE" ,"LUR" ,"ILO", "PBO")
 
+#Sucras taken from https://www.sciencedirect.com/science/article/pii/S0140673613607333
 
-
-######################## Figure 1#####################################################
 
 sucra.efficacy=c(1,0.92,0.85,0.79,0.65,0.61,0.54,0.48,0.46,0.35,0.34,0.33,0.32,0.19,0.17,0)
 
@@ -105,13 +109,17 @@ sucra.acceptability=c(0.87,0.93,0.88,0.74,0.84,0.43,0.15,0.56,0.57,0.23,0.33,0.4
 
 sucra.weight=c(0.17,0.69,0.05,0.44,0.49,0.1,0.86,0.42,0.73,0.28,0.84,0.27,0.65,0.84,0.19,0.99)
 
+
+######################## Figure 1#####################################################
+
+
 plot(sucra.efficacy, sucra.acceptability,xlab='efficacy',ylab='acceptability',main="SUCRA values")
 
 
 antipsychotic=c("CLO", "AMI", "OLA", "RIS", "PAL" ,"ZOT", "HAL", "QUE", "ARI" ,"SER", "ZIP", "CPZ" ,"ASE" ,"LUR" ,"ILO", "PBO")
 
 par(mfrow=c(1,3))
-plot(sucra.efficacy, sucra.acceptability,xlab='efficacy',ylab='weight',main="efficacy vs weight gain")
+plot(sucra.efficacy, sucra.acceptability,xlab='efficacy',ylab='acceptability',main="efficacy vs acceptability")
 text(sucra.efficacy, sucra.acceptability, labels=antipsychotic, cex= 0.7, pos=3)
 
 
@@ -125,7 +133,12 @@ text(sucra.acceptability, sucra.weight, labels=antipsychotic, cex= 0.7, pos=3)
 
 
 
+
+
+
 ############## efficacy - effect size #########################################
+
+# effect size
 
 x=c(-0.22,-0.29,-0.32,-0.38,-0.39,-0.43,-0.44,-0.45,-0.49,-0.49,-0.5 ,-0.5 ,-0.55,-0.55,-0.88,
     
@@ -168,6 +181,8 @@ efficacy[lower.tri(efficacy)]=x
 
 ################# efficacy 95% CI ########################################
 
+# lower bound for efficacy (95%)
+
 efficacy.lower=c(-0.41,-0.44,-0.47,-0.57,-0.60,-0.58,-0.61,-0.62,-0.68,-0.66,-0.67,-0.69,-0.74,-0.73,-1.03,
                  
                  -0.19,-0.21,-0.32,-0.38,-0.32,-0.36,-0.37,-0.43,-0.41,-0.47,-0.45,-0.50,-0.48,-0.78,
@@ -199,6 +214,7 @@ efficacy.lower=c(-0.41,-0.44,-0.47,-0.57,-0.60,-0.58,-0.61,-0.62,-0.68,-0.66,-0.
                  -0.43)
 
 
+# upper bound for efficacy (95%)
 
 
 efficacy.upper=c(-0.04,-0.14,-0.16,-0.20,-0.19,-0.28,-0.28,-0.28,-0.30,-0.31,-0.33,-0.30,-0.36,-0.38,-0.73,
@@ -245,9 +261,13 @@ var.efficacy[lower.tri(var.efficacy)]=var.effic
 
 ############## acceptability - effect size #########################################
 
+# acceptability is dichotomous and we transform the odds ratios to SMD using the Cochrane handbook guidelines (section 12.6.3)
+
 acceptability=matrix(rep(0,p^2),p,p,dimnames=list(antipsychotic))
 
-x=0.55*log(c(1.1,1,0.87,0.97,0.7, 0.57,0.76,0.76,0.6,0.65,0.71,0.68,0.61,0.67,0.46,
+# effect size (SMD)
+
+x=sqrt(3)/pi*log(c(1.1,1,0.87,0.97,0.7, 0.57,0.76,0.76,0.6,0.65,0.71,0.68,0.61,0.67,0.46,
              
              0.93,0.81,0.9,0.66,0.53,0.7,0.71,0.56,0.60,0.67,0.63,0.56,0.63,0.43,
              
@@ -285,6 +305,9 @@ acceptability[lower.tri(acceptability)]=x
 
 ################# acceptability 95% CI ########################################
 
+# lower bound for acceptability (95%)
+
+
 acceptability.lower=c(0.69,0.68,0.59,0.63,0.39,0.40,0.50,0.51,0.38,0.43,0.48,0.43,0.39,0.45,0.32,
                       
                       0.69,0.60,0.62,0.37,0.40,0.51,0.51,0.38,0.43,0.44,0.43,0.39,0.44,0.32,
@@ -314,6 +337,9 @@ acceptability.lower=c(0.69,0.68,0.59,0.63,0.39,0.40,0.50,0.51,0.38,0.43,0.48,0.4
                       0.83,0.61,
                       
                       0.56)
+
+# upper bound for acceptability (95%)
+
 
 acceptability.upper=c(1.69,1.43,1.22,1.42,1.16,0.82,1.10,1.09,0.89,0.95,1.01,1.01,0.90,0.99,0.65,
                       
@@ -345,7 +371,9 @@ acceptability.upper=c(1.69,1.43,1.22,1.42,1.16,0.82,1.10,1.09,0.89,0.95,1.01,1.0
                       
                       0.84)
 
-var.acc=0.55*(log(acceptability.upper)-log(acceptability.lower)/3.92)^2
+# estimating the variance of the SMD for acceptability
+
+var.acc=3/pi^2*((log(acceptability.upper)-log(acceptability.lower))/3.92)^2
 
 var.acceptability=matrix(rep(0,p^2),p,p,dimnames=list(antipsychotic))
 
@@ -359,35 +387,37 @@ var.acceptability[lower.tri(var.acceptability)]=var.acc
 
 weight=matrix(rep(0,p^2),p,p,dimnames=list(antipsychotic))
 
+# effect size
+
 x=c(0.45,-0.09,0.23,0.27,-0.06,0.57,0.22,0.49,0.12,0.55,0.1,0.42,0.55,0.04,0.65,
-  
-  -0.54,-0.22,-0.21,-0.52,0.08,-0.23,0.03,-0.33,0.1,-0.35,-0.03,0.1,-0.42,0.2,
-  
-  0.32,0.36,0.03,0.65,0.31,0.57,0.21,0.64,0.19,0.51,0.64,0.12,0.74,
-  
-  0.04,-0.3,0.42,-0.01,0.25,-0.11,0.32,-0.13,0.19,0.32,-0.2,0.42,
-  
-  -0.34,0.29,-0.05,0.21,-0.15,0.28,-0.17,0.15,0.28,-0.24,0.38,
-  
-  0.71,0.28,0.55,0.18,0.61,0.16,0.48,0.62,0.1,0.71,
-  
-  -0.34,-0.08,-0.45,-0.01,-0.46,-0.14,-0.01,-0.53,0.09,
-  
-  0.26,-0.1,0.33,-0.12,0.2,0.33,-0.19,0.32,
-  
-  -0.37,0.07,-0.38,-0.06,0.07,-0.45,0.17,
-  
-  0.43,-0.02,0.3,0.43,-0.08,0.53,
-  
-  -0.45,-0.13,0,-0.52,0.1,
-  
-  0.32,0.45,-0.07,0.55,
-  
-  0.13,-0.39,0.23,
-  
-  -0.52,0.1,
-  
-  0.62)
+    
+    -0.54,-0.22,-0.21,-0.52,0.08,-0.23,0.03,-0.33,0.1,-0.35,-0.03,0.1,-0.42,0.2,
+    
+    0.32,0.36,0.03,0.65,0.31,0.57,0.21,0.64,0.19,0.51,0.64,0.12,0.74,
+    
+    0.04,-0.3,0.42,-0.01,0.25,-0.11,0.32,-0.13,0.19,0.32,-0.2,0.42,
+    
+    -0.34,0.29,-0.05,0.21,-0.15,0.28,-0.17,0.15,0.28,-0.24,0.38,
+    
+    0.71,0.28,0.55,0.18,0.61,0.16,0.48,0.62,0.1,0.71,
+    
+    -0.34,-0.08,-0.45,-0.01,-0.46,-0.14,-0.01,-0.53,0.09,
+    
+    0.26,-0.1,0.33,-0.12,0.2,0.33,-0.19,0.32,
+    
+    -0.37,0.07,-0.38,-0.06,0.07,-0.45,0.17,
+    
+    0.43,-0.02,0.3,0.43,-0.08,0.53,
+    
+    -0.45,-0.13,0,-0.52,0.1,
+    
+    0.32,0.45,-0.07,0.55,
+    
+    0.13,-0.39,0.23,
+    
+    -0.52,0.1,
+    
+    0.62)
 
 weight[lower.tri(weight)]=x
 
@@ -396,6 +426,10 @@ weight=t(weight)
 weight[lower.tri(weight)]=x
 
 ################# weight 95% CI ########################################
+
+# lower bound for weight gain (95%)
+
+
 weight.lower=c(-0.82,-0.43,-0.57,-0.63,-0.48,-0.9,-0.55,-0.83,-0.48,-0.91,-0.46,-0.79,-0.9,-0.39,-0.99,
                
                -0.69,-0.37,-0.36,-0.79,-0.27,-0.41,-0.21,-0.53,-0.28,-0.61,-0.24,-0.29,-0.6,-0.35,
@@ -425,6 +459,9 @@ weight.lower=c(-0.82,-0.43,-0.57,-0.63,-0.48,-0.9,-0.55,-0.83,-0.48,-0.91,-0.46,
                -0.69,-0.21,
                
                -0.74)
+
+# upper bound for acceptability (95%)
+
 
 weight.upper<-c(-0.09,0.24,0.12,0.12,0.34,-0.22,0.12,-0.13,0.25,-0.2,0.25,-0.06,-0.19,0.32,-0.31,
                 
@@ -466,6 +503,33 @@ var.weight<-t(var.weight)
 
 var.weight[lower.tri(var.weight)]=var.wei
 
+
+##################### Table 1 ####################################
+
+# Table 1 is filled in by hand. We need to estimate the p-scores for efficacy, acceptability and weight
+# These can be estimated using the pscores function that we defined above
+
+# For efficacy, second column in Table 1
+efficacy=array(efficacy,dim=c(dim(efficacy)[1],dim(efficacy)[2],1))
+var.efficacy=array(var.efficacy,dim=c(dim(var.efficacy)[1],dim(var.efficacy)[2],1))
+
+pscore.efficacy<-pscores(efficacy,var.efficacy,0,0,"H",label=antipsychotic)
+
+# For acceptability, fourth column in Table 1
+
+acceptability=array(acceptability,dim=c(dim(acceptability)[1],dim(acceptability)[2],1))
+var.acceptability=array(var.acceptability,dim=c(dim(var.acceptability)[1],dim(var.acceptability)[2],1))
+
+pscore.acceptability<-pscores(acceptability,var.acceptability,0,0,"H",label=antipsychotic)
+
+# For weight.gain, sixth column in Table 1
+
+weight=array(weight,dim=c(dim(weight)[1],dim(weight)[2],1))
+var.weight=array(var.weight,dim=c(dim(var.weight)[1],dim(var.weight)[2],1))
+
+pscore.weight<-pscores(weight,var.weight,0,0,"H",label=antipsychotic)
+
+
 ###################### Figure 2##########################################
 
 
@@ -486,7 +550,7 @@ for (i in 1:length(beta))
 
 
 
-plot(0,0,ylim=c(0,1),type="l",xlim=c(-0.02,max(beta)),ylab="probability",xlab="beta",main="")
+plot(0,0,ylim=c(0,1),type="l",xlim=c(-0.02,max(beta)),ylab="p-score",xlab="CIV",main="")
 lines(beta,pscores.efficacy[1:length(beta),1],col="red")
 lines(beta,pscores.efficacy[1:length(beta),2],col="green")
 lines(beta,pscores.efficacy[1:length(beta),3],col="blue")
@@ -505,6 +569,50 @@ lines(beta,pscores.efficacy[1:length(beta),15])
 lines(beta,pscores.efficacy[1:length(beta),16])
 lines(beta,rowMeans(pscores.efficacy),type='b')
 
+
+############################ Table 2 #####################################
+
+# to fill in column 2
+
+k=2
+
+outcomes<-array(rep(0,p^2*k),c(p,p,k))
+
+outcomes[,,1]<-efficacy
+outcomes[,,2]<-acceptability
+
+var.outcomes<-array(rep(0,p^2*k),c(p,p,k))
+var.outcomes[,,1]<-var.efficacy
+var.outcomes[,,2]<-var.acceptability
+
+
+
+correlation=matrix(c(1,0,0,1),2,2)
+
+# pscores.eff_acc gives the results for the second column in Table 2
+pscores.eff_acc<-pscores(outcomes,var.outcomes,correlation,c(0,0),type=c("H","H"),antipsychotic)
+
+# to fill in column 3
+
+k=3
+
+outcomes<-array(rep(0,p^2*k),c(p,p,k))
+
+outcomes[,,1]<-efficacy
+outcomes[,,2]<-acceptability
+outcomes[,,3]<-weight
+
+var.outcomes<-array(rep(0,p^2*k),c(p,p,k))
+var.outcomes[,,1]<-var.efficacy
+var.outcomes[,,2]<-var.acceptability
+var.outcomes[,,3]<-var.weight
+
+
+
+correlation=matrix(c(1,0,0,0,1,0,0,0,1),3,3)
+# pscores.eff_acc_weight gives the results for the third column in Table 2
+
+pscores.eff_acc_weight<-pscores(outcomes,var.outcomes,correlation,c(0,0,0),type=c("H","H","H"),antipsychotic)
 
 
 ###############################Figure 3################################################
@@ -535,7 +643,7 @@ for (i in 1:length(gamma))
   pscores.weight[i,]<-pscores(outcomes,var.outcomes,correlation,beta=c(0,-gamma[i]),type=c("H","H"),antipsychotic)
 }
 
-plot(0,0,ylim=c(0,1),type="l",xlim=c(-1,0.02),ylab="probability",xlab="gamma",main="")
+plot(0,0,ylim=c(0,1),type="l",xlim=c(-1.05,0.02),ylab="p-score",xlab="CIV",main="")
 lines(gamma,pscores.weight[1:length(gamma),1],col="red")
 lines(gamma,pscores.weight[1:length(gamma),2],col="green")
 lines(gamma,pscores.weight[1:length(gamma),3],col="blue")
@@ -569,12 +677,12 @@ for (i in 1:length(gamma))
   pscores.weight[i,]<-pscores(outcomes,var.outcomes,correlation,beta=c(-0.2,-gamma[i]),type=c("H","H"),antipsychotic)
 }
 
-plot(0,0,ylim=c(0,1),type="l",xlim=c(-1,0.02),ylab="probability",xlab="gamma",main="")
+plot(0,0,ylim=c(0,1),type="l",xlim=c(-1.05,0.02),ylab="p-score",xlab="CIV",main="")
 lines(gamma,pscores.weight[1:length(gamma),1],col="red")
 lines(gamma,pscores.weight[1:length(gamma),2],col="green")
 lines(gamma,pscores.weight[1:length(gamma),3],col="blue")
 lines(gamma,pscores.weight[1:length(gamma),4],col="purple")
-lines(gamma,pscores.weight[1:length(gamma),5],col="pink")
+lines(gamma,pscores.weight[1:length(gamma),5])
 lines(gamma,pscores.weight[1:length(gamma),6])
 lines(gamma,pscores.weight[1:length(gamma),7])
 lines(gamma,pscores.weight[1:length(gamma),8])
